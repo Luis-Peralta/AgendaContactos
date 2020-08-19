@@ -40,7 +40,7 @@ def cuadro2():
     cuadro2=Frame(root,bg="blue")
     cuadro2.pack(fill="both",expand="True")
     fondo2=Label(cuadro2,image=bg2).place(x=0,y=0)
-    #------Opciones-----------------------------------------
+    #------Opciones-BOTONES-------------------------------
     add = Button(cuadro2,text="AÑADIR CONTACTOS",font=("Arial",16),command=lambda:crearRegistro())
     add.place(x=30,y=250)
 
@@ -60,6 +60,7 @@ def cuadro2():
         add.config(state=DISABLED)
         editar.config(state=DISABLED)
         lista.config(state=DISABLED)
+        #------BUTTONS/ENTRYS/LABELS----------------------------
         name1 = StringVar()
         tel1 = StringVar()
         email1 = StringVar()
@@ -99,6 +100,7 @@ def cuadro2():
         add.config(state=DISABLED)
         editar.config(state=DISABLED)
         lista.config(state=DISABLED)
+        #------BUTTONS/ENTRYS/LABELS----------------------------
         id1 = StringVar()
         name1 = StringVar()
         tel1 = StringVar()
@@ -123,6 +125,7 @@ def cuadro2():
         #------Actualiza un contacto-----------------------------------------
         def update():
             try:
+                """BASE DE DATOS"""
                 conexion = sqlite3.connect('agenda.db')
                 CursorAgenda = conexion.cursor()
                 CursorAgenda.execute("UPDATE CONTACTOS SET NOMBRE='"+ name1.get()+
@@ -132,11 +135,13 @@ def cuadro2():
                 conexion.commit()
                 messagebox.showinfo("Bien!","Contacto actualizado con exito!. ")
                 clean()
+                """BASE DE DATOS"""
             except:
                 messagebox.showwarning("oops.","Algo salio mal :( ... Vuelve a ingresar los valores!. ")
         #------Borra un contacto----------------------------------------------
         def borrar():
             try:
+                """BASE DE DATOS"""
                 conexion = sqlite3.connect('agenda.db')
                 CursorAgenda = conexion.cursor()
                 pregunta = messagebox.askquestion("ATENCIÓN!","Estas seguro de borrar este contacto?")
@@ -148,23 +153,32 @@ def cuadro2():
                     editar.config(state=NORMAL)
                     lista.config(state=NORMAL)
                 conexion.commit()
+                """BASE DE DATOS"""
             except:
                 messagebox.showwarning("oops.","Algo salio mal :( ... Vuelve a ingresar los valores!. ")
         #------Busca un contacto----------------------------------------------
         def buscar():
             try:
+                """BASE DE DATOS"""
                 conexion = sqlite3.connect('agenda.db')
                 CursorAgenda = conexion.cursor()
                 CursorAgenda.execute("SELECT * FROM CONTACTOS WHERE ID="+ id1.get())
-                for contac in CursorAgenda:
+                for contac in CursorAgenda:                     
                     name1.set(contac[1])
                     tel1.set(contac[2])
                     email1.set(contac[3])
+                    idVER = contac[0]
+                if id1.get() != str(idVER):
+                    messagebox.showwarning("Weep","Contacto no encontrado!. ")
                 conexion.commit()
+                """BASE DE DATOS"""
                 Editar.config(state=NORMAL)
                 Borrar.config(state=NORMAL)
             except:
-                messagebox.showwarning("oops.","Algo salio mal :( ... Vuelve a ingresar los valores!. ")   
+                messagebox.showerror("Weep","Contacto no encontrado!. ") 
+                clean()
+                Editar.config(state=DISABLED)
+                Borrar.config(state=DISABLED)  
         def clean():
             name1.set("")
             tel1.set("")
@@ -186,14 +200,13 @@ def cuadro2():
         add.config(state=DISABLED)
         editar.config(state=DISABLED)
         lista.config(state=DISABLED)
-
-        titleBuscar = Label(cuadro5,text="*N°*  |*NOMBRE*  |*TELEFONO*  |*EMAIL*",font=("Consolas",18),bg="yellow").grid(row=0,column=0,pady=5)
-
-        conexion = sqlite3.connect('agenda.db')
-        CursorAgenda = conexion.cursor()
+        titleBuscar = Label(cuadro5,text="*N°*  |*NOMBRE*  |*TELEFONO*  |*EMAIL*",font=("Consolas",18),bg="yellow").grid(row=0,column=0,pady=5)        
         id_contacto = Listbox(cuadro5, exportselection=0, highlightcolor="yellow", selectbackground="blue", selectmode = SINGLE,font=Font(family="Sans Serif", size=14)
                             ,width="57", height="12")
-
+        id_contacto.grid(row=1,column=0,pady=5)
+        """BASE DE DATOS"""
+        conexion = sqlite3.connect('agenda.db')
+        CursorAgenda = conexion.cursor()
         CursorAgenda.execute("SELECT * FROM CONTACTOS")
         cont = 1
         for contacto in CursorAgenda:
@@ -202,10 +215,7 @@ def cuadro2():
                 cont+=1
             except:
                 messagebox.showwarning("oops.","Algo salio mal :( ... Vuelve a ingresar los valores!. ")
-
-        id_contacto.grid(row=1,column=0,pady=5)
-
-        Salir = Button(cuadro5,text="Salir",font=("Arial",16),command=lambda:exit1()).grid(row=2,column=0,pady=5)
+        """BASE DE DATOS"""
         def exit1():
             add.config(state=NORMAL)
             editar.config(state=NORMAL)
@@ -213,6 +223,7 @@ def cuadro2():
             cuadro5.destroy() 
 
         conexion.commit()
+        Salir = Button(cuadro5,text="Salir",font=("Arial",16),command=lambda:exit1()).grid(row=2,column=0,pady=5)
 
 #------Titulo/Inicio-------------------------------------
 ingreso = Button(cuadro1,text="Ingresar",font=("Arial",30),bg="yellow",command=lambda:cuadro2()).place(x=710,y=370)
@@ -227,12 +238,14 @@ class contacto():
 
     def add(self):
         try:
+            """BASE DE DATOS"""
             conexion = sqlite3.connect('agenda.db')
             CursorAgenda = conexion.cursor()
             registro = [(self.nombre, int(self.telefono), self.email)]
             CursorAgenda.executemany("INSERT INTO CONTACTOS VALUES(NULL,?,?,?)", registro)
             messagebox.showinfo("Listo!","Contacto agregado satisfactoriamente!...\n")
             conexion.commit()
+            """BASE DE DATOS"""
         except:
             messagebox.showwarning("oops.","Algo salio mal :( ... Vuelve a ingresar los valores!. ")
 
